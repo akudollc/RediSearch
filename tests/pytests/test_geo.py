@@ -20,6 +20,12 @@ def testGeoFtAdd(env):
   env.expect('FT.SEARCH', 'idx', '@g:[1.23 4.56 1 km]').equal([2L, 'geo2', ['g', '1.23,4.56'],
                                                                    'geo3', ['g', '"1.23,4.56"']] )
 
+def testGeoParsing(env):
+  env.expect('FT.CREATE idx SCHEMA g GEO').ok()
+  env.expect('FT.ADD', 'idx', 'geo', '1', 'FIELDS', 'g', '"1.23,4.56"foo').ok() # this is an error and won't index
+  env.expect('FT.SEARCH', 'idx', '@location:[1.23 4.56 10 km]', 'nocontent').equal([0L])
+  print env.cmd('ft.info idx') 
+
 def testGeoDistanceSimple(env):
   env.skipOnCluster()
   env.expect('ft.create', 'idx', 'schema', 'name', 'text', 'location', 'geo', 'hq', 'geo').ok()

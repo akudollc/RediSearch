@@ -420,8 +420,12 @@ typedef int (*GetKeyFunc)(const RLookupKey *kk, RLookupRow *dst, RLookupLoadOpti
 static int loadIndividualKeys(RLookup *it, RLookupRow *dst, RLookupLoadOptions *options) {
   // Load the document from the schema. This should be simple enough...
   void *key = NULL;  // This is populated by getKeyCommon; we free it at the end
-  GetKeyFunc getKey = (options->dmd->type == DocumentType_Hash) ? (GetKeyFunc)getKeyCommonHash :
-                                                                  (GetKeyFunc)getKeyCommonJSON;
+  GetKeyFunc getKey;
+  switch (options->dmd->type) {
+    case DocumentType_Hash: getKey = (GetKeyFunc)getKeyCommonHash; break;
+    case DocumentType_Json: getKey = (GetKeyFunc)getKeyCommonJSON; break;  
+    case DocumentType_None: RS_LOG_ASSERT(1, "Doc type is not supported");
+  }
   int rc = REDISMODULE_ERR;
   if (options->nkeys) {
     for (size_t ii = 0; ii < options->nkeys; ++ii) {
@@ -454,7 +458,7 @@ done:
     switch (options->dmd->type) {
     case DocumentType_Hash: RedisModule_CloseKey(key); break;
     case DocumentType_Json: if (japi) japi->closeKey(key); break;
-    case DocumentType_None: RS_LOG_ASSERT(1, "placeholder");
+    case DocumentType_None: RS_LOG_ASSERT(1, "Doc type is not supported");
     }
   }
   return rc;
@@ -626,11 +630,12 @@ int RLookup_LoadDocument(RLookup *it, RLookupRow *dst, RLookupLoadOptions *optio
   if (options->dmd) {
     dst->sv = options->dmd->sortVector;
   }
+
   if (options->mode & RLOOKUP_LOAD_ALLKEYS) {
-    if (options->dmd->type == DocumentType_Hash) {
-      rv = RLookup_HGETALL(it, dst, options);
-    } else if (options->dmd->type == DocumentType_Json) {
-      rv = RLookup_JSON_GetAll(it, dst, options);
+    switch (options->dmd->type) {
+      case DocumentType_Hash: rv = RLookup_HGETALL(it, dst, options); break;
+      case DocumentType_Json: rv = RLookup_JSON_GetAll(it, dst, options); break;
+      case DocumentType_None: RS_LOG_ASSERT(1, "Doc type is not supported");
     }
   } else {
     rv = loadIndividualKeys(it, dst, options);

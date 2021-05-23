@@ -40,7 +40,6 @@ int GetJSONAPIs(RedisModuleCtx *ctx, int subscribeToModuleChange) {
 
 static RSLanguage SchemaRule_JsonLanguage(RedisModuleCtx *ctx, const SchemaRule *rule,
                                           RedisJSONKey jsonKey, const char *keyName) {
-  int rv = REDISMODULE_ERR;
   RSLanguage lang = rule->lang_default;
   if (!rule->lang_field) {
     goto done;
@@ -114,7 +113,8 @@ int Document_LoadSchemaFieldJson(Document *doc, RedisSearchCtx *sctx) {
     if (!json) {
         continue;
     }
-    if (type == JSONType_Array || type == JSONType_Object) {
+    // Array, object and null types are ignored.
+    if (type == JSONType_Array || type == JSONType_Object || type == JSONType_Null) {
         japi->close(json);
         json = NULL;
       continue;

@@ -492,7 +492,7 @@ FIELD_PREPROCESSOR(geoPreprocessor) {
   char *end1 = NULL, *end2 = NULL;
   double lon = strtod(c, &end1);
   double lat = strtod(pos, &end2); /// failing here
-  if (*end1 || (*end2 && *end2 != '"')) {
+  if (*end1 || (*end2 && (*end2 != '"' && *(end2 + 1)))) {
     return REDISMODULE_ERR;
   }
 
