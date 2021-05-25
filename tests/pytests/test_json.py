@@ -275,6 +275,7 @@ def testAggregate(env):
     add_values(env)
 
     cmd = ['ft.aggregate', 'games', '*',
+           'LOAD', '1', '@$.brand',
            'GROUPBY', '1', '@$.brand',
            'REDUCE', 'count', '0', 'AS', 'count',
            'SORTBY', 2, '@count', 'desc',
