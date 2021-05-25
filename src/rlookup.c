@@ -611,7 +611,7 @@ static int RLookup_JSON_GetAll(RLookup *it, RLookupRow *dst, RLookupLoadOptions 
     goto done;
   }
 
-  RLookupKey *rlk = RLookup_GetKeyEx(it, JSON_ROOT, strlen(JSON_ROOT), RLOOKUP_F_OCREAT/* | RLOOKUP_F_NAMEALLOC*/);
+  RLookupKey *rlk = RLookup_GetKeyEx(it, JSON_ROOT, strlen(JSON_ROOT), RLOOKUP_F_OCREAT | RLOOKUP_F_NAMEALLOC);
   RSValue *vptr = RS_StealRedisStringVal(value);
   RLookup_WriteOwnKey(rlk, dst, vptr);
 
