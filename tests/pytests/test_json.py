@@ -423,6 +423,9 @@ def testAsProjectionRedefinedLabel(env):
         [1L, 'doc:1', ['MyOnTheFlyReturnLabel', '"riceratops"']])
     env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '3', '@$.t', 'AS', 'MyOnTheFlyReturnLabel').equal(
         [1L, ['MyOnTheFlyReturnLabel', '"riceratops"']])
+    env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '3', '@$.t', 'AS', 'func',
+                                            'APPLY', 'upper(@func)', 'AS', 'upper').equal(
+        [1L, ['func', '"riceratops"', 'upper', '"RICERATOPS"']])
 
     # Allow redefining a label with existing label found in another field in the schema
     env.expect('ft.search', 'idx2', '*', 'RETURN', '3', '$.t', 'AS', 'labelN').equal(
@@ -433,7 +436,7 @@ def testAsProjectionRedefinedLabel(env):
     env.expect('ft.search', 'idx2', '*', 'RETURN', '4', '$.n', 'AS', 'labelT', 'labelT').equal(
         [1L, 'doc:1', ['labelT', '"9072"']])
     env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '4', '@$.n', 'AS', 'labelT', 'labelT').equal(
-        [1L, ['labelT', '"9072"', 'labelT', '"riceratops"']])
+        [1L, ['labelT', '"9072"']])
 
     env.expect('ft.search', 'idx2', '*', 'RETURN', '4', '$.n', 'AS', 'labelT', 'labelN').equal(
         [1L, 'doc:1', ['labelT', '"9072"', 'labelN', '"9072"']])
