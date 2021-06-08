@@ -437,6 +437,8 @@ def testAsProjectionRedefinedLabel(env):
         [1L, 'doc:1', ['labelT', '"9072"']])
     env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '4', '@$.n', 'AS', 'labelT', 'labelT').equal(
         [1L, ['labelT', '"9072"']])
+    env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '4', 'labelT', '@$.n', 'AS', 'labelT').equal(
+        [1L, ['labelT', '"riceratops"']])
 
     env.expect('ft.search', 'idx2', '*', 'RETURN', '4', '$.n', 'AS', 'labelT', 'labelN').equal(
         [1L, 'doc:1', ['labelT', '"9072"', 'labelN', '"9072"']])
