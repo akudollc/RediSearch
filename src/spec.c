@@ -179,6 +179,17 @@ static void IndexSpec_TimedOutProc(RedisModuleCtx *ctx, IndexSpec *sp) {
   RedisModule_Log(NULL, "notice", "Freeing index %s by timer", sp->name);
 #endif
 
+  // Idea: Master deletes and replicate to slaves
+  //       Slave reinsert the timer + 1 sec and awaits master drop command
+  //       If slave being promoted to Master then will drop when timer pops again
+  if (RedisModule_GetContextFlags(ctx) & REDISMODULE_CTX_FLAGS_SLAVE) {
+    if (dictFetchValue(specDict_g, sp->name)) {
+      sp->timerId = RedisModule_CreateTimer(RSDummyContext, 1000,
+                                    (RedisModuleTimerProc)IndexSpec_TimedOutProc, sp);
+    }
+    return;
+  }
+
   sp->isTimerSet = false;
   IndexSpec_Free(sp);
 
