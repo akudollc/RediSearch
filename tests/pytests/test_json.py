@@ -432,13 +432,17 @@ def testAsProjectionRedefinedLabel(env):
         [1L, 'doc:1', ['labelN', '"riceratops"']])
     env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '3', '@$.t', 'AS', 'labelN').equal([1L, ['labelN', '"riceratops"']])
 
-    # (?) Allow redefining a label with existing label found in another field in the schema, together with just a label from the schema
+    # If there is multiple appearance of the same field alias, the first occurrence remains
     env.expect('ft.search', 'idx2', '*', 'RETURN', '4', '$.n', 'AS', 'labelT', 'labelT').equal(
         [1L, 'doc:1', ['labelT', '"9072"']])
+    env.expect('ft.search', 'idx2', '*', 'RETURN', '4', 'labelT', '$.n', 'AS', 'labelT').equal(
+        [1L, 'doc:1', ['labelT', '"riceratops"']])
     env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '4', '@$.n', 'AS', 'labelT', 'labelT').equal(
         [1L, ['labelT', '"9072"']])
     env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '4', 'labelT', '@$.n', 'AS', 'labelT').equal(
         [1L, ['labelT', '"riceratops"']])
+    env.expect('ft.aggregate', 'idx2', '*', 'LOAD', '6', '@$.t', 'AS', 'dup', '@$.n', 'AS', 'dup').equal(
+        [1L, ['dup', '"riceratops"']])
 
     env.expect('ft.search', 'idx2', '*', 'RETURN', '4', '$.n', 'AS', 'labelT', 'labelN').equal(
         [1L, 'doc:1', ['labelT', '"9072"', 'labelN', '"9072"']])

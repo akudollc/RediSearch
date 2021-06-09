@@ -1140,13 +1140,6 @@ int AREQ_BuildPipeline(AREQ *req, int options, QueryError *status) {
           }
           const char *name = path;
 
-          RLookupKey *kk = RLookup_GetKey(curLookup, path, RLOOKUP_F_OEXCL | RLOOKUP_F_OCREAT);
-          if (!kk) {
-            // We only get a NULL return if the key already exists, which means
-            // that we don't need to retrieve it again.
-            continue;
-          }
-
           if (AC_AdvanceIfMatch(&lstp->args, SPEC_AS_STR)) {
             int rv = AC_GetString(&lstp->args, &name, NULL, 0);
             if (rv != AC_OK) {
@@ -1157,10 +1150,15 @@ int AREQ_BuildPipeline(AREQ *req, int options, QueryError *status) {
               return REDISMODULE_ERR;
             }
           }
-          // set lookupkey name to name.
-          // by defualt "name = path" 
-          kk->name = name;
-          kk->name_len = strlen(kk->name);
+
+          RLookupKey *kk = RLookup_GetKey(curLookup, name, RLOOKUP_F_OEXCL | RLOOKUP_F_OCREAT);
+          if (!kk) {
+            // We only get a NULL return if the key already exists, which means
+            // that we don't need to retrieve it again.
+            continue;
+          }
+
+          kk->path = path;
           lstp->keys[lstp->nkeys++] = kk;
         }
         if (lstp->nkeys) {
