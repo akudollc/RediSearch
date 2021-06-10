@@ -21,6 +21,7 @@
 #include "rules.h"
 #include "dictionary.h"
 #include "doc_types.h"
+#include "commands.h"
 
 #define INITIAL_DOC_TABLE_SIZE 1000
 
@@ -192,6 +193,7 @@ static void IndexSpec_TimedOutProc(RedisModuleCtx *ctx, IndexSpec *sp) {
 
   sp->isTimerSet = false;
   IndexSpec_Free(sp);
+  RedisModule_Replicate(ctx, RS_DROP_INDEX_IF_X_CMD, "cc", sp->name, "DD");
 
 #ifdef _DEBUG
   RedisModule_Log(NULL, "notice", "Freeing index by timer: done");
