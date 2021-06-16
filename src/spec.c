@@ -52,9 +52,6 @@ bool isTrimming = false;
 
 static const FieldSpec *getFieldCommon(const IndexSpec *spec, const char *name, size_t len) {
   for (size_t i = 0; i < spec->numFields; i++) {
-    if (len != strlen(spec->fields[i].name)) {
-      continue;
-    }
     const FieldSpec *fs = spec->fields + i;
     if (!strncmp(fs->name, name, len)) {
       return fs;
